@@ -1,0 +1,16 @@
+/*
+
+Main menu:			('*' - switch over to Main menu, '#" - back to temp. data)
+
+H-Bars and Pumps	(H-Bars 4 pcs, Boiler Pump, 2nd floor Pump, 1st floor Pump, Hot water Pump, Camin Pump)		('#' - to higher level)
+Time and Date		(Current time ans Date, Data sending periods, Server time synchronization)					('#' - to higher level)
+Heating settings	(T° settings in rooms, scenarion setting, heating day/night, heating power (2, 4, 6))		('#' - to higher level)
+System				(e-mail, display on/off, light intensity, GPRS: APN, USER, PWD)								('#' - to higher level)
+
+Data display: 		('#' from Main menu or after 30 S idle state)
+
+1. Temperatur values in rooms 1st floor (Kitchen, Living, Bedroom_1st, Corridor, Bath) + 2nd floor (Master bedroom, bath_2nd, Living_2nd, Bedroom_2nd)
+2. Temperatures in tank, 2nd floor radiators in/out, heating floor in/out
+3. Energy accumulated
+
+*/
