@@ -1,9 +1,9 @@
 <?php
 
 $cred_db = array(	"server"=>"localhost", 
-			"user"  =>"u486738398_kot60", 
-			"pwd"   =>"Ugly100Fairy", 
-			"db"    =>"u486738398_kot60_DB");
+			"user"  =>"user_kot60", 
+			"pwd"   =>"PWD", 
+			"db"    =>"db_kot60_DB");
 
 	
 
