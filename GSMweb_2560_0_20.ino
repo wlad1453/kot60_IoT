@@ -303,12 +303,14 @@ void loop() {
    
   if (modem.isGprsConnected()) {
     SerialMon.println(F("GPRS i-net connected"));
+    lcd.setCursor(2,3); lcd.print("GPRS i-net connect");
   }
 #endif
 
   for(byte i = 0; i < 10; i++)
   {
     SerialMon.print(F("Connecting to ")); SerialMon.println(server);
+    lcd.setCursor(2,3); lcd.print("Connecting to srv");
     if (!client.connect(server, port)) {
       SerialMon.println(F(" fail i-net site "));
       delay(1000); // 5000 // 10 000
@@ -318,12 +320,14 @@ void loop() {
 
     // Make a HTTP GET request:
     SerialMon.println(F("Performing HTTP GET request..."));
+    lcd.setCursor(2,3); lcd.print("HTTP GET request ");
     client.print(String("GET ") + data  + String(" HTTP/1.1\r\n") );  // resource + data 
     SerialMon.println(F(" send GET + data + HTTP/1.1  "));
       
     client.print(String("Host: ") + server + "\r\n");  SerialMon.println(F(" send Host: server  "));
     client.print("Connection: close\r\n\r\n");         SerialMon.println(F("Connection: closed"));
-      
+    lcd.setCursor(2,3); lcd.print("Connection closed");
+          
     // client.print("Keep-Alive: 300\r\n");         // added by me
     // client.print("Connection: Keep-Alive\r\n\r\n");  // added by me
     client.println();
