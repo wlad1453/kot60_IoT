@@ -559,6 +559,9 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {
       }   // h
     }     // m
   }       // s
+  
   rtc.setTime( h, m, s );           // Set the time to hh:mm:ss (24hr format)
   rtc.setDate( d, month, y );       // Set the date to dd/mm/yy   
+  SerialMon.print("time synchronized: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.println(m); SerialMon.print(":"); SerialMon.println(s);
+  SerialMon.print("date synchronized: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.println(month); SerialMon.print("-"); SerialMon.println(y);
 }
