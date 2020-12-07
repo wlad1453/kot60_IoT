@@ -131,7 +131,7 @@ void setup() {
   // showTimeSerial(&rtc_t);      
   
   // 
-  setRTC(); // Set RTC to the system time values (__TIME__, __DATE__). If the FW has been downloaded into uC!!!
+  // setRTC(); // Set RTC to the system time values (__TIME__, __DATE__). If the FW has been downloaded into uC!!!
 
   SerialMon.println(F("Wait..."));
 
@@ -272,8 +272,9 @@ void loop() {
   lcd.setCursor(2,3); lcd.print("Connecting server");
    
   // SerialMon.print(F("Resource + data: ")); SerialMon.println(data);
-  SerialMon.println(F("Waiting for GSM network..."));
-  lcd.setCursor(2,3); lcd.print("Waiting for GSM  ");
+  SerialMon.println( F("Waiting for GSM network...") );
+  lcd.setCursor(0,3); lcd.print( F("Waiting for GSM net.") );
+  //--------------------------------01234567890123456789
  
   if (!modem.waitForNetwork()) {
     SerialMon.println(F(" fail GSM"));
@@ -281,56 +282,71 @@ void loop() {
     return;
   }
   SerialMon.println(F(" success GSM"));
-  lcd.setCursor(2,3); lcd.print( F("** Success GSM **") );
+  lcd.setCursor(0,3); lcd.print( F("*** Success GSM  ***") );
+  //--------------------------------01234567890123456789
   
 
   if (modem.isNetworkConnected()) {
     SerialMon.println(F("Network connected GSM"));
-    lcd.setCursor(2,3); lcd.print( F("Network connected") );
+    lcd.setCursor(0,3); lcd.print( F(" GSM netw. connected") );
+    //--------------------------------01234567890123456789
   }
 
 #if TINY_GSM_USE_GPRS
   // GPRS connection parameters are usually set after network registration
     SerialMon.print( F("Connecting to Megafon ") );
-    lcd.setCursor(2,3); lcd.print( F("Connecting to Megafon ") );
+    lcd.setCursor(0,3); lcd.print( F("Connecting to Megafn") );
+    //--------------------------------01234567890123456789
     SerialMon.print(apn); SerialMon.print("  ");
     if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
       SerialMon.println(F(" fail GPRS i-net"));
-      lcd.setCursor(2,3); lcd.print( F(" fail GPRS i-net") );
+      lcd.setCursor(0,3); lcd.print( F(" fail GPRS internet ") );
+      //--------------------------------01234567890123456789
       delay(1000); // 10000
       return;
     }
     SerialMon.println(F(" success GPRS i-net "));
-    lcd.setCursor(2,3); lcd.print( F("Success GPRS i-nt") );
+    lcd.setCursor(0,3); lcd.print( F("Success GPRS internt") );
+    //--------------------------------01234567890123456789
    
   if (modem.isGprsConnected()) {
     SerialMon.println(F("GPRS i-net connected"));
-    lcd.setCursor(2,3); lcd.print( F("GPRS int connect ") );
+    lcd.setCursor(0,3); lcd.print( F("GPRS i-net connected") );
+    //--------------------------------01234567890123456789
   }
 #endif
 
   for(byte i = 0; i < 10; i++)
   {
     SerialMon.print(F("Connecting to ")); SerialMon.println(server);
-    lcd.setCursor(2,3); lcd.print("Connect.to "); lcd.print(server);
+    lcd.setCursor(0,3); lcd.print("Conn.to "); lcd.print(server);
+    //-----------------------------01234567890123456789
     if (!client.connect(server, port)) {
       SerialMon.println(F(" fail i-net site "));
-      lcd.setCursor(2,3); lcd.print( F(" fail i-net site ") );
+      lcd.setCursor(0,3); lcd.print( F(" fail internet site ") );
+      //--------------------------------01234567890123456789
       delay(1000); // 5000 // 10 000
       return;
     }
     SerialMon.println(F(" success i-net site "));
-    lcd.setCursor(2,3); lcd.print( F(" success i-net site ") );
+    lcd.setCursor(0,3); lcd.print( F(" success i-net site ") );
+    //--------------------------------01234567890123456789
 
     // Make a HTTP GET request:
-    SerialMon.println(F("Performing HTTP GET request..."));
-    lcd.setCursor(2,3); lcd.print("HTTP GET request ");
+    SerialMon.println( F("Performing HTTP GET request...") );
+    lcd.setCursor(0,3); lcd.print( F("HTTP GET request... ") );
+    //--------------------------------01234567890123456789
     client.print(String("GET ") + data  + String(" HTTP/1.1\r\n") );  // resource + data 
     SerialMon.println(F(" send GET + data + HTTP/1.1  "));
+    lcd.setCursor(0,3); lcd.print( F("send GET+data+HTTP/1") );
+    //--------------------------------01234567890123456789
       
     client.print(String("Host: ") + server + "\r\n");  SerialMon.println(F(" send Host: server  "));
+    lcd.setCursor(0,3); lcd.print( F(" send Host: server  "));
+    //--------------------------------01234567890123456789
     client.print("Connection: close\r\n\r\n");         SerialMon.println(F("Connection: closed"));
-    lcd.setCursor(2,3); lcd.print("Connection closed");
+    lcd.setCursor(0,3); lcd.print( F("Connection closed   ") );
+    //--------------------------------01234567890123456789
           
     // client.print("Keep-Alive: 300\r\n");         // added by me
     // client.print("Connection: Keep-Alive\r\n\r\n");  // added by me
@@ -366,6 +382,8 @@ void loop() {
           
           lastDataSent = millis();  SerialMon.print(F(" Last Data Sent  "));  SerialMon.println(lastDataSent);  
           success = true;           SerialMon.print(F(" Success:  "));        SerialMon.println(success);  
+          lcd.setCursor(0,3); lcd.print( F("    Tosser success ") ); lcd.print( success );
+          //--------------------------------01234567890123456789
         }
       }  
       i++;
@@ -374,11 +392,15 @@ void loop() {
   
     SerialMon.println(""); 
     SerialMon.print(F(" Data buffer  ")); SerialMon.println(buf.length());  
+    lcd.setCursor(0,3); lcd.print( F("Rcvd data buffer ") ); lcd.print( buf.length() );
+    //--------------------------------01234567890123456789
     SerialMon.println(buf);  
    
     Tpos = buf.indexOf("$measT");                                     // Getting Time out of recieved http text.
     Tstr = buf.substring(Tpos + 10, Tpos + 18);
-    SerialMon.print(F(" Time recieved ")); SerialMon.println(Tstr);  
+    SerialMon.print(F(" Time recieved ")); SerialMon.println(Tstr); 
+    lcd.setCursor(0,3); lcd.print( F(" Time rcvd: ") ); lcd.print( Tstr );
+    //--------------------------------01234567890123456789
     
     Dpos = buf.indexOf("$measD");                                     // Getting Date out of recieved http text.
     Dstr = buf.substring(Dpos + 10, Dpos + 18);    
@@ -396,10 +418,17 @@ void loop() {
       rtc.setDate( Dstr.substring(0, 2).toInt(), Dstr.substring(3, 5).toInt(), Dstr.substring(6, 8).toInt() );           // Set the date to dd/mm/yy 
       //} */
     syncronizeRTC( Tstr, Dstr, 8 );
+   
+    
 
     // -------- Get time and date from rtc ---------
     rtc_t = rtc.getTime();                                 
-    rtc_temp = rtc.getTemp();
+    rtc_temp = rtc.getTemp(); 
+    
+    showTimeLCD(&rtc_t); 
+    
+    lcd.setCursor(0,3); lcd.print( F("* RTC synchronized *") ); 
+    //--------------------------------01234567890123456789
     /*
     SerialMon.print("Time read from RTC: "); SerialMon.print(rtc_t.hour); SerialMon.print(":"); SerialMon.print(rtc_t.min); SerialMon.print(":"); SerialMon.println(rtc_t.sec);
     SerialMon.print("Date read from RTC: "); SerialMon.print(day_of_month = rtc_t.date); SerialMon.print("-"); SerialMon.print(rtc_t.mon); SerialMon.print("-"); SerialMon.println(rtc_t.year);
@@ -408,7 +437,12 @@ void loop() {
  
   // *****  Shutdown  *****
   client.stop();              SerialMon.println(F("Server disconnected"));
+  lcd.setCursor(0,3); lcd.print( F("Server disconnected.") ); 
+  //--------------------------------01234567890123456789
+  
   modem.gprsDisconnect();     SerialMon.println(F("GPRS disconnected"));
+  lcd.setCursor(0,3); lcd.print( F(" GPRS disconnected. ") ); 
+  //--------------------------------01234567890123456789
 
   }  // Here ends the sending section
 
