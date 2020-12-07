@@ -374,11 +374,11 @@ void loop() {
    
     Tpos = buf.indexOf("$measT");                                     // Getting Time out of recieved http text.
     Tstr = buf.substring(Tpos + 10, Tpos + 18);
-    SerialMon.print(F(" Time recieved")); SerialMon.println(Tstr);  
+    SerialMon.print(F(" Time recieved ")); SerialMon.println(Tstr);  
     
     Dpos = buf.indexOf("$measD");                                     // Getting Date out of recieved http text.
     Dstr = buf.substring(Dpos + 10, Dpos + 18);    
-    SerialMon.print(F(" Date recieved")); SerialMon.println(Dstr); 
+    SerialMon.print(F(" Date recieved ")); SerialMon.println(Dstr); 
     /*
     SerialMon.print(F(" H: ")); SerialMon.println( Tstr.substring(0, 2).toInt() );
     SerialMon.print(F(" M: ")); SerialMon.println( Tstr.substring(3, 5).toInt() );
@@ -542,7 +542,12 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {
   uint8_t h, m, s;
   uint8_t d, maxD, month, y;
   
-  SerialMon.println(F(" *** RTC syncronization procedure *** "));
+  SerialMon.println(F(" *** RTC syncronization procedure *** ")); SerialMon.println();
+  SerialMon.print("Time str: "); SerialMon.println(T); 
+  SerialMon.print("Date str: "); SerialMon.println(D); 
+
+
+  
   h = T.substring(0, 2).toInt(); m = T.substring(3, 5).toInt(); s = T.substring(6, 8).toInt(); 
   d = D.substring(0, 2).toInt(); m = D.substring(3, 5).toInt(); y = D.substring(6, 8).toInt();
 
