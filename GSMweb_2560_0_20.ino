@@ -281,42 +281,46 @@ void loop() {
     return;
   }
   SerialMon.println(F(" success GSM"));
-  lcd.setCursor(2,3); lcd.print("** Success GSM **");
+  lcd.setCursor(2,3); lcd.print( F("** Success GSM **") );
   
 
   if (modem.isNetworkConnected()) {
     SerialMon.println(F("Network connected GSM"));
-    lcd.setCursor(2,3); lcd.print("Network connected");
+    lcd.setCursor(2,3); lcd.print( F("Network connected") );
   }
 
 #if TINY_GSM_USE_GPRS
   // GPRS connection parameters are usually set after network registration
-    SerialMon.print(F("Connecting to Megafon "));
+    SerialMon.print( F("Connecting to Megafon ") );
+    lcd.setCursor(2,3); lcd.print( F("Connecting to Megafon ") );
     SerialMon.print(apn); SerialMon.print("  ");
     if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
       SerialMon.println(F(" fail GPRS i-net"));
+      lcd.setCursor(2,3); lcd.print( F(" fail GPRS i-net") );
       delay(1000); // 10000
       return;
     }
     SerialMon.println(F(" success GPRS i-net "));
-    lcd.setCursor(2,3); lcd.print("Success GPRS i-nt");
+    lcd.setCursor(2,3); lcd.print( F("Success GPRS i-nt") );
    
   if (modem.isGprsConnected()) {
     SerialMon.println(F("GPRS i-net connected"));
-    lcd.setCursor(2,3); lcd.print("GPRS int connect ");
+    lcd.setCursor(2,3); lcd.print( F("GPRS int connect ") );
   }
 #endif
 
   for(byte i = 0; i < 10; i++)
   {
     SerialMon.print(F("Connecting to ")); SerialMon.println(server);
-    lcd.setCursor(2,3); lcd.print("Connecting to srv");
+    lcd.setCursor(2,3); lcd.print("Connect.to "); lcd.print(server);
     if (!client.connect(server, port)) {
       SerialMon.println(F(" fail i-net site "));
+      lcd.setCursor(2,3); lcd.print( F(" fail i-net site ") );
       delay(1000); // 5000 // 10 000
       return;
     }
     SerialMon.println(F(" success i-net site "));
+    lcd.setCursor(2,3); lcd.print( F(" success i-net site ") );
 
     // Make a HTTP GET request:
     SerialMon.println(F("Performing HTTP GET request..."));
