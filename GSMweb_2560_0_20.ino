@@ -392,7 +392,13 @@ void loop() {
       rtc.setDate( Dstr.substring(0, 2).toInt(), Dstr.substring(3, 5).toInt(), Dstr.substring(6, 8).toInt() );           // Set the date to dd/mm/yy 
       //} */
     syncronizeRTC( Tstr, Dstr, 7 );
-    
+
+    // -------- Get time and date from rtc ---------
+     rtc_t = rtc.getTime();                                 
+  rtc_temp = rtc.getTemp();
+  
+  SerialMon.print("Time read from RTC: "); SerialMon.print(rtc_t.hour); SerialMon.print(":"); SerialMon.print(rtc_t.min); SerialMon.print(":"); SerialMon.println(rtc_t.sec);
+  SerialMon.print("Date read from RTC: "); SerialMon.print(day_of_month = rtc_t.date); SerialMon.print("-"); SerialMon.print(rtc_t.mon); SerialMon.print("-"); SerialMon.println(rtc_t.year);
     
   }  
  
@@ -536,9 +542,12 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {
   uint8_t h, m, s;
   uint8_t d, maxD, month, y;
   
-  SerialMon.print(F(" *** RTC syncronization *** "));
+  SerialMon.println(F(" *** RTC syncronization procedure *** "));
   h = T.substring(0, 2).toInt(); m = T.substring(3, 5).toInt(); s = T.substring(6, 8).toInt(); 
   d = D.substring(0, 2).toInt(); m = D.substring(3, 5).toInt(); y = D.substring(6, 8).toInt();
+
+  SerialMon.print("Time out of str: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.print(m); SerialMon.print(":"); SerialMon.println(s);
+  SerialMon.print("Date out of str: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.print(month); SerialMon.print("-"); SerialMon.println(y);
 
   if ( month == 2 ) { if ( y % 4 ) maxD = 28; else maxD = 29; }                     // February leap year condition
   else if ( month == 4 || month == 6 || month == 9 || month == 11) maxD = 30;       // Apr., Jun., Sep., Nov.,
