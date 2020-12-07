@@ -504,7 +504,7 @@ void showTimeLCD(Time * tts) {
   if( tts->hour < 10 ) lcd.print("0");  lcd.print(tts->hour); lcd.print(":");
   if( tts->min < 10 )  lcd.print("0");  lcd.print(tts->min);  lcd.print(":");
   if( tts->sec < 10 )  lcd.print("0");  lcd.print(tts->sec); 
-  lcd.setCursor(15,1); lcd.print(rtc.getTemp()); lcd.setCursor(19,1); lcd.write(0xdf);
+  // lcd.setCursor(15,1); lcd.print(rtc.getTemp()); lcd.setCursor(19,1); lcd.write(0xdf);
   lcd.setCursor(5,2); 
   if ( tts->date < 10 ) lcd.print("0"); lcd.print(tts->date); lcd.print("-"); 
   if ( tts->mon  < 10 ) lcd.print("0"); lcd.print(tts->mon); lcd.print("-"); 
@@ -545,14 +545,16 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {
   SerialMon.println(F(" *** RTC syncronization procedure *** ")); SerialMon.println();
   SerialMon.print("Time str: "); SerialMon.println(T); 
   SerialMon.print("Date str: "); SerialMon.println(D); 
-
+ 
+  SerialMon.print("Time out of str: "); SerialMon.print(T.substring(0, 2)); SerialMon.print(":"); SerialMon.print(T.substring(3, 5)); SerialMon.print(":"); SerialMon.println(T.substring(6, 8));
+  SerialMon.print("Date out of str: "); SerialMon.print(D.substring(0, 2)); SerialMon.print("-"); SerialMon.print(D.substring(3, 5)); SerialMon.print("-"); SerialMon.println(D.substring(6, 8));
 
   
   h = T.substring(0, 2).toInt(); m = T.substring(3, 5).toInt(); s = T.substring(6, 8).toInt(); 
-  d = D.substring(0, 2).toInt(); m = D.substring(3, 5).toInt(); y = D.substring(6, 8).toInt();
+  d = D.substring(0, 2).toInt(); month = D.substring(3, 5).toInt(); y = D.substring(6, 8).toInt();
 
-  SerialMon.print("Time out of str: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.print(m); SerialMon.print(":"); SerialMon.println(s);
-  SerialMon.print("Date out of str: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.print(month); SerialMon.print("-"); SerialMon.println(y);
+  SerialMon.print("Time out of str w int: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.print(m); SerialMon.print(":"); SerialMon.println(s);
+  SerialMon.print("Date out of str w int: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.print(month); SerialMon.print("-"); SerialMon.println(y);
 
   if ( month == 2 ) { if ( y % 4 ) maxD = 28; else maxD = 29; }                     // February leap year condition
   else if ( month == 4 || month == 6 || month == 9 || month == 11) maxD = 30;       // Apr., Jun., Sep., Nov.,
