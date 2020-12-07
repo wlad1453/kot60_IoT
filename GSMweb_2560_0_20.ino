@@ -303,7 +303,7 @@ void loop() {
    
   if (modem.isGprsConnected()) {
     SerialMon.println(F("GPRS i-net connected"));
-    lcd.setCursor(2,3); lcd.print("GPRS i-net connect");
+    lcd.setCursor(2,3); lcd.print("GPRS int connect ");
   }
 #endif
 
@@ -374,11 +374,11 @@ void loop() {
    
     Tpos = buf.indexOf("$measT");                                     // Getting Time out of recieved http text.
     Tstr = buf.substring(Tpos + 10, Tpos + 18);
-    SerialMon.print(F(" Time ")); SerialMon.println(Tstr);  
+    SerialMon.print(F(" Time recieved")); SerialMon.println(Tstr);  
     
     Dpos = buf.indexOf("$measD");                                     // Getting Date out of recieved http text.
     Dstr = buf.substring(Dpos + 10, Dpos + 18);    
-    SerialMon.print(F(" Date ")); SerialMon.println(Dstr); 
+    SerialMon.print(F(" Date recieved")); SerialMon.println(Dstr); 
     /*
     SerialMon.print(F(" H: ")); SerialMon.println( Tstr.substring(0, 2).toInt() );
     SerialMon.print(F(" M: ")); SerialMon.println( Tstr.substring(3, 5).toInt() );
@@ -562,6 +562,6 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {
   
   rtc.setTime( h, m, s );           // Set the time to hh:mm:ss (24hr format)
   rtc.setDate( d, month, y );       // Set the date to dd/mm/yy   
-  SerialMon.print("time synchronized: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.println(m); SerialMon.print(":"); SerialMon.println(s);
-  SerialMon.print("date synchronized: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.println(month); SerialMon.print("-"); SerialMon.println(y);
+  SerialMon.print("Time synchronized: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.print(m); SerialMon.print(":"); SerialMon.println(s);
+  SerialMon.print("Date synchronized: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.print(month); SerialMon.print("-"); SerialMon.println(y);
 }
