@@ -4,9 +4,13 @@
  *   
  *   ancestor of 0_0 version
  *   Migration to Mega2560 platform
- *   version 0.01 15/05/20
+ *   version 20 07/12/20
  *   
  *   OK
+ *   
+ *   Next steps:
+ *   1. Keyboard 
+ *   2. Menu
  **************************************************************/
 #include <Wire.h>              // Arduino IDE
 #include <LiquidCrystal_I2C.h> // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
@@ -29,20 +33,18 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I
 
 
 DS3231  rtc(SDA, SCL);                  // Init the DS3231 using the hardware interface
-Time rtc_t;                                 // Creating the time structure 't'
+Time    rtc_t;                          // Creating the time structure 'rtc_t'
 
 uint8_t   hours = 0, minutes = 0, seconds = 0, stop_sec = 0; // t.hour, t.min
 uint8_t   month = 1, day_of_month =1;
 uint8_t   screen_count = 0;
 uint16_t  y = 2000;
 float     rtc_temp (0);
-boolean   show_time = true;
 
 OneWire oneWire_0( ONE_WIRE_BUS_0 );            // Setup a oneWire instance. Heat accumulator sensors. Further heat radiators and floor sens.
 DallasTemperature sensorsHA( &oneWire_0 );      // Pass our oneWire reference to Dallas Temperature.
 OneWire oneWire_1( ONE_WIRE_BUS_1 );            // Setup a oneWire instance. Rooms 1st floor sensors, further 2nd floor and outer temp.
 DallasTemperature sensorsR( &oneWire_1 );       // Pass our oneWire reference to Dallas Temperature.
-
 
 //  ----  Sensor addresses --------------
 DeviceAddress Sensor0 = { 0x28, 0xFF, 0xB1, 0x97, 0xB2, 0x15, 0x03, 0xAF }; // Sensor 1 upper
@@ -58,8 +60,7 @@ DeviceAddress Sensor7 = { 0x28, 0xFF, 0x67, 0x53, 0xC0, 0x15, 0x01, 0x46 }; // B
 uint8_t * sens[] = { Sensor0, Sensor1, Sensor2, Sensor3, Sensor4, Sensor5, Sensor6, Sensor7 };
 
 // Buffer T   Upp.  MidU  MidL  Bott. Ro.1  Ro.2  Ro.3  Ro.4, T[8] - avarage
-float T[9] = {25.0, 22.0, 20.0, 18.0, 22.0, 24.0, 23.0, 19.0, 21.0};        // Some default values
-float * ptrT[9] = {&T[0], &T[1], &T[2], &T[3], &T[4], &T[5], &T[6], &T[7], &T[8]} ;
+float T[9] = {25.0, 22.0, 20.0, 18.0, 22.0, 24.0, 23.0, 19.0, 21.0};        // Default values
 
 // Increase RX buffer to capture the entire response
 // Chips without internal buffering (A6/A7, ESP8266, M590)
@@ -109,7 +110,7 @@ const char resource[] = "/a6script.php"; // "/pics/Kot60_IoT.txt"; // "/TinyGSM/
 
   unsigned long lastDataSent(0); 
   
-  // *** Header declaration of function set ***
+  // *** Header declaration of the functions set ***
   void ModemA6_ON(byte pwrON);
   void showTempMask();
   void showTimeLCD(Time * tts);
@@ -129,7 +130,8 @@ void setup() {
   // rtc_t = rtc.getTime();  
   // showTimeSerial(&rtc_t);      
   
-  // setRTC(); // Set RTC to the system time values (__TIME__, __DATE__). If the FW has been downloaded into uC!!!
+  // 
+  setRTC(); // Set RTC to the system time values (__TIME__, __DATE__). If the FW has been downloaded into uC!!!
 
   SerialMon.println(F("Wait..."));
 
@@ -167,10 +169,10 @@ void loop() {
   uint16_t eqw(0);
   uint16_t Tpos(0), Dpos(0); 
   
-  rtc_t = rtc.getTime();                                   // Get time and date from rtc
+  rtc_t    = rtc.getTime();                                         // Get time and date from rtc
   rtc_temp = rtc.getTemp();
   
-  hours = rtc_t.hour;  minutes = rtc_t.min; seconds = rtc_t.sec;   // Current time stored in 'hours' and 'minutes'
+  hours = rtc_t.hour;  minutes = rtc_t.min; seconds = rtc_t.sec;    // Current time stored in 'hours' and 'minutes'
   y = rtc_t.year; month = rtc_t.mon; day_of_month = rtc_t.date;
   
   // if ( (millis() - screenStopWatch) > 1000 ) {    // a variant of getting the next second
@@ -203,7 +205,8 @@ void loop() {
     else {}  // Show outer T, stored kWts, etc.
     
     showTimeSerial( &rtc_t ); 
-    screen_count++; 
+    
+    screen_count++;                                     // seconds in the screen cycle
     if ( screen_count > 11 ) screen_count = 0;
     // *** End presentation
   }
@@ -215,9 +218,6 @@ void loop() {
     lastDataSent = millis();
   }  
   
-  // SerialMon.print(F("\n***** Last Cycle done ****  "));   SerialMon.print(millis());   
-  // SerialMon.print(F(" ***** Last Data Sent ****  "));     SerialMon.println(lastDataSent);   
-
   if ( T[0] < 0 && T[1] < 0 && T[2] < 0 && T[3] < 0 ) { //***  Simulation (if no real measured data present)  ***
   
     Ut = 40 + random(0,40);  Um = 30 + random(0,20);  Bm = 25 + random(0,15);  Bt = 10 + random(0,15);
@@ -235,7 +235,7 @@ void loop() {
   SerialMon.print("  Bed1 = "); SerialMon.print(Bed1); SerialMon.print("  BathT = "); SerialMon.println(BathT); 
   //******  End of Simulation   *******
   
-  MaccT = (Ut + Um + Bm + Bt) / 4;                                                      // Middle temp. value in the heat accumulator 
+  MaccT = (Ut + Um + Bm + Bt) / 4;                                                      // Mean temp. value in the heat accumulator 
   TankT = Tconv(Ut) + Tconv(Um) + Tconv(Bm) + Tconv(Bt);                                // String variable to be sent to a6script.php, 8 numbers
   RoomT = Tconv(KitT) + Tconv(LivT) + Tconv(BathT) + Tconv(CorT) + Tconv(Bed1);         // String variable to be sent to a6script.php, 10 numbers
   
@@ -391,15 +391,15 @@ void loop() {
       rtc.setTime( Tstr.substring(0, 2).toInt(), Tstr.substring(3, 5).toInt(), Tstr.substring(6, 8).toInt() );           // Set the time to hh:mm:ss (24hr format)
       rtc.setDate( Dstr.substring(0, 2).toInt(), Dstr.substring(3, 5).toInt(), Dstr.substring(6, 8).toInt() );           // Set the date to dd/mm/yy 
       //} */
-    syncronizeRTC( Tstr, Dstr, 7 );
+    syncronizeRTC( Tstr, Dstr, 8 );
 
     // -------- Get time and date from rtc ---------
-     rtc_t = rtc.getTime();                                 
-  rtc_temp = rtc.getTemp();
-  
-  SerialMon.print("Time read from RTC: "); SerialMon.print(rtc_t.hour); SerialMon.print(":"); SerialMon.print(rtc_t.min); SerialMon.print(":"); SerialMon.println(rtc_t.sec);
-  SerialMon.print("Date read from RTC: "); SerialMon.print(day_of_month = rtc_t.date); SerialMon.print("-"); SerialMon.print(rtc_t.mon); SerialMon.print("-"); SerialMon.println(rtc_t.year);
-    
+    rtc_t = rtc.getTime();                                 
+    rtc_temp = rtc.getTemp();
+    /*
+    SerialMon.print("Time read from RTC: "); SerialMon.print(rtc_t.hour); SerialMon.print(":"); SerialMon.print(rtc_t.min); SerialMon.print(":"); SerialMon.println(rtc_t.sec);
+    SerialMon.print("Date read from RTC: "); SerialMon.print(day_of_month = rtc_t.date); SerialMon.print("-"); SerialMon.print(rtc_t.mon); SerialMon.print("-"); SerialMon.println(rtc_t.year);
+    */
   }  
  
   // *****  Shutdown  *****
@@ -538,24 +538,30 @@ void showTempLCD( float Temp[9] ) {
    lcd.setCursor(cln2,3); lcd.print( String(Temp[7],1) ); 
 }
 
-void syncronizeRTC( String T, String D, uint8_t corrS ) {
-  uint8_t h, m, s;
-  uint8_t d, maxD, month, y;
+void syncronizeRTC( String T, String D, uint8_t corrS ) {     // This funktion syncronizes the rtc with the server time read from php script
+  // T - "hh:mm:ss", D - "dd/month/yy", 10/12/20 - year after 2k
+  // corrS - number of seconds for the setting time correction
+  
+  uint8_t h, m, s;            // hours, minutes, seconds, max value 255
+  uint8_t d, maxD, month;     // day of month, max day number in the current month, month number
+  uint16_t y;                 // max value 32k
   
   SerialMon.println(F(" *** RTC syncronization procedure *** ")); SerialMon.println();
+  /*
   SerialMon.print("Time str: "); SerialMon.println(T); 
   SerialMon.print("Date str: "); SerialMon.println(D); 
  
   SerialMon.print("Time out of str: "); SerialMon.print(T.substring(0, 2)); SerialMon.print(":"); SerialMon.print(T.substring(3, 5)); SerialMon.print(":"); SerialMon.println(T.substring(6, 8));
   SerialMon.print("Date out of str: "); SerialMon.print(D.substring(0, 2)); SerialMon.print("-"); SerialMon.print(D.substring(3, 5)); SerialMon.print("-"); SerialMon.println(D.substring(6, 8));
-
+  */
   
   h = T.substring(0, 2).toInt(); m = T.substring(3, 5).toInt(); s = T.substring(6, 8).toInt(); 
   d = D.substring(0, 2).toInt(); month = D.substring(3, 5).toInt(); y = D.substring(6, 8).toInt();
-
+  /*
   SerialMon.print("Time out of str w int: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.print(m); SerialMon.print(":"); SerialMon.println(s);
   SerialMon.print("Date out of str w int: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.print(month); SerialMon.print("-"); SerialMon.println(y);
-
+  */
+  
   if ( month == 2 ) { if ( y % 4 ) maxD = 28; else maxD = 29; }                     // February leap year condition
   else if ( month == 4 || month == 6 || month == 9 || month == 11) maxD = 30;       // Apr., Jun., Sep., Nov.,
   else maxD = 31;                                                                   // Jan., Mar., May., Jul., Aug., Oct., Dec.
@@ -570,14 +576,15 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {
         if ( d > maxD ) { 
           d -= maxD; 
           month++; 
-          if ( month > 12 ) { month -= 12; y++; }
+          if ( month > 12 ) { month = 1; y++; }
         } // d
       }   // h
     }     // m
   }       // s
-  
+  y += 2000;    // Y2K issue
+    
   rtc.setTime( h, m, s );           // Set the time to hh:mm:ss (24hr format)
-  rtc.setDate( d, month, y );       // Set the date to dd/mm/yy   
-  SerialMon.print("Time synchronized: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.print(m); SerialMon.print(":"); SerialMon.println(s);
-  SerialMon.print("Date synchronized: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.print(month); SerialMon.print("-"); SerialMon.println(y);
+  rtc.setDate( d, month, y );       // Set the date to dd/mm/yy (y - '2xxx')
+  /* SerialMon.print("Time synchronized: "); SerialMon.print(h); SerialMon.print(":"); SerialMon.print(m); SerialMon.print(":"); SerialMon.println(s);
+  SerialMon.print("Date synchronized: "); SerialMon.print(d); SerialMon.print("-"); SerialMon.print(month); SerialMon.print("-"); SerialMon.println(y); */
 }
