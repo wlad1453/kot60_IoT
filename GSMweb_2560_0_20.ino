@@ -126,9 +126,7 @@ void setup() {
   
   lcd.begin(20,4);                                  // (20,4) initialize the lcd for 20 chars 4 lines and turn on backlight
   rtc.begin();                                      // initialize RTC DS3231
-  // rtc_t = rtc.getTime();  
-  // showTimeSerial(&rtc_t);      
-   
+    
   // setRTC(); // Set RTC to the system time values (__TIME__, __DATE__). If the FW has been downloaded into uC!!!
 
   SerialMon.println(F("Wait..."));
@@ -175,6 +173,21 @@ void loop() {
   
   if(stop_sec != seconds) {                         // Next second condition
     stop_sec = seconds;  
+        
+    showTimeSerial( &rtc_t ); 
+
+    // Status of the equipment (Pumps, heating bars)
+    for (int i = 0; i < 9; i++)  eqwP[i] = &eqwArr[i];                        // assign the address of bool.
+  
+    byte len = sizeof(eqwArr)/sizeof(eqwArr[0]);                              // Number of elements in equArr
+    eqw = eqSta(len, eqwArr, eqwP);                                           // Encoded equipment status (binary)  
+    
+    SerialMon.print("** "); SerialMon.print(eqw); SerialMon.print("  ");
+    for (byte i = 0; i < len ; i++) {
+      SerialMon.print(eqwArr[i]); SerialMon.print(".");                       // Show equipment status
+    }
+    SerialMon.println(F(" **"));
+        
 
     // *** Sensors reading section ***
     sensorsHA.requestTemperatures();
@@ -188,7 +201,7 @@ void loop() {
       if ( T[i] < -100 ) T[i] = 15 * ( 5 - i ) + 0.5;         // Just to simulate some meaningfull number
       SerialMon.print("T"); SerialMon.print(i); SerialMon.print(" "); SerialMon.print(T[i]); SerialMon.print("   "); 
     }
-    SerialMon.println();  
+    SerialMon.println("\n");  
     // End sensor reading
 
     // *** Presentaion section ***
@@ -198,8 +211,6 @@ void loop() {
       showTempLCD( T );
     }
     else {}  // Show outer T, stored kWts, etc.
-    
-    showTimeSerial( &rtc_t ); 
     
     screen_count++;                                     // seconds in the screen cycle
     if ( screen_count > 11 ) screen_count = 0;
@@ -224,10 +235,10 @@ void loop() {
   
   KitT = T[4]; LivT = T[5]; Bed1 = T[6]; BathT = T[7];              // Real sensors reading
   CorT = 15 + random(0,10);                                         // Simulated
-  
+  /*
   SerialMon.println(); 
   SerialMon.print("KitT = "); SerialMon.print(KitT); SerialMon.print("  LivT = "); SerialMon.print(LivT); 
-  SerialMon.print("  Bed1 = "); SerialMon.print(Bed1); SerialMon.print("  BathT = "); SerialMon.println(BathT); 
+  SerialMon.print("  Bed1 = "); SerialMon.print(Bed1); SerialMon.print("  BathT = "); SerialMon.println(BathT);  */
   //******  End of Simulation   *******
   
   MaccT = (Ut + Um + Bm + Bt) / 4;                                                      // Mean temp. value in the heat accumulator 
@@ -238,19 +249,7 @@ void loop() {
   // SerialMon.println(F("\t\t\t\t**  HW status"));
   // SerialMon.println("\t\t\t\t\t**");
       
-  for (int i = 0; i < 9; i++)  eqwP[i] = &eqwArr[i];                        // assign the address of bool.
   
-  byte len = sizeof(eqwArr)/sizeof(eqwArr[0]);                              // Number of elements in equArr
-  eqw = eqSta(len, eqwArr, eqwP);                                           // Encoded equipment status (binary)
-  /*
-  for (byte i = 0; i < len ; i++) {
-    SerialMon.print(i); SerialMon.print("\t");
-  }  
-  SerialMon.println("**");*/
-  for (byte i = 0; i < len ; i++) {
-    SerialMon.print(eqwArr[i]); SerialMon.print("-"); // SerialMon.print("\t"); 
-  }
-  SerialMon.println(F("**\n"));
   
   data = "?Ut=" + String(Ut) + "&Um=" + String(Um) + "&Bm=" + String(Bm) + "&Bt=" + String(Bt);                     // Heat accumulator values
   data += "&kitT=" + String(KitT) + "&livT=" + String(LivT) + "&bedT=" + String(Bed1) + "&bathT=" + String(BathT);  // Room temp. values
@@ -475,7 +474,7 @@ uint16_t eqSta(byte lngt, bool bo[], bool* boP[]) {               // This functi
     }
   }  
    return eqD;
-} // End eqSta()
+} // End eqSta()  
 
 void setRTC() {
   String sysTime = __TIME__, sysDate = __DATE__;      // THese data are actual only during the compilation
@@ -511,13 +510,13 @@ void setRTC() {
 }
 
 void showTimeSerial(Time * tts){  // Time to show via Serial
-  SerialMon.print("Time:\t"); 
+  SerialMon.print("Time: "); 
   if( tts->hour < 10 ) SerialMon.print("0");   SerialMon.print(tts->hour);    SerialMon.print(":"); 
   if( tts->min < 10 )  SerialMon.print("0");   SerialMon.print(tts->min);     SerialMon.print(":"); 
   if( tts->sec < 10 )  SerialMon.print("0");   SerialMon.print(tts->sec);     SerialMon.print("\t");
-  SerialMon.print(" Date:\t"); SerialMon.print(tts->year); SerialMon.print("-"); 
+  SerialMon.print(" Date: "); SerialMon.print(tts->year); SerialMon.print("-"); 
   SerialMon.print(tts->mon); SerialMon.print("-"); SerialMon.print(tts->date); 
-  SerialMon.print("\t"); SerialMon.print(rtc.getTemp()); SerialMon.println("°C");
+  SerialMon.print("   "); SerialMon.print(rtc.getTemp()); SerialMon.print("°C   ");
 }
 
 void showTimeLCD(Time * tts) {
