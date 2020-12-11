@@ -12,12 +12,11 @@
  *   1. Keyboard 
  *   2. Menu
  **************************************************************/
-#include <Wire.h>              // Arduino IDE
-#include <LiquidCrystal_I2C.h> // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
-#include <DS3231.h>
+#include <Wire.h>               // I2C, Arduino IDE
+#include <LiquidCrystal_I2C.h>  // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
+#include <DS3231.h>             // RTC 3231
 #include <OneWire.h>            // OneWire Library                         *new*
 #include <DallasTemperature.h>  // DS18B20 Library                         *new*
-// #include <string.h>
 
 // Set the pins on the I2C chip used for LCD connections:
 //                    addr, en,rw,rs,d4,d5,d6,d7,bl,blpol
@@ -60,7 +59,7 @@ DeviceAddress Sensor7 = { 0x28, 0xFF, 0x67, 0x53, 0xC0, 0x15, 0x01, 0x46 }; // B
 uint8_t * sens[] = { Sensor0, Sensor1, Sensor2, Sensor3, Sensor4, Sensor5, Sensor6, Sensor7 };
 
 // Buffer T   Upp.  MidU  MidL  Bott. Ro.1  Ro.2  Ro.3  Ro.4, T[8] - avarage
-float T[9] = {25.0, 22.0, 20.0, 18.0, 22.0, 24.0, 23.0, 19.0, 21.0};        // Default values
+float T[9] = {25.0, 22.0, 20.0, 18.0, 21.0, 22.0, 23.0, 24.0, 25.0};        // Default values
 
 // Increase RX buffer to capture the entire response
 // Chips without internal buffering (A6/A7, ESP8266, M590)
@@ -129,8 +128,7 @@ void setup() {
   rtc.begin();                                      // initialize RTC DS3231
   // rtc_t = rtc.getTime();  
   // showTimeSerial(&rtc_t);      
-  
-  // 
+   
   // setRTC(); // Set RTC to the system time values (__TIME__, __DATE__). If the FW has been downloaded into uC!!!
 
   SerialMon.println(F("Wait..."));
@@ -165,7 +163,7 @@ void loop() {
   bool bar1(0), bar2(1), bar3(0), hWat(0), hfP(1), hrP(0), hwP(1), boilP(1), camP(1);           // Bars and pumps state. Simulated values
   bool eqwArr[] = {camP, boilP, hwP, hrP, hfP, hWat, bar3, bar2, bar1};                         // Equipment status array of bool. Camin, boiler, hot water, heating radiators, heating floor
   bool *eqwP[9];                                                                                // Pointers array  
-  bool showTemp = true;
+  bool showTemp = true;  
   uint16_t eqw(0);
   uint16_t Tpos(0), Dpos(0); 
   
@@ -175,9 +173,6 @@ void loop() {
   hours = rtc_t.hour;  minutes = rtc_t.min; seconds = rtc_t.sec;    // Current time stored in 'hours' and 'minutes'
   y = rtc_t.year; month = rtc_t.mon; day_of_month = rtc_t.date;
   
-  // if ( (millis() - screenStopWatch) > 1000 ) {    // a variant of getting the next second
-    // screenStopWatch = millis();    
-
   if(stop_sec != seconds) {                         // Next second condition
     stop_sec = seconds;  
 
@@ -190,7 +185,7 @@ void loop() {
       if ( i < 4 )  T[i] = sensorsHA.getTempC(sens[i]);       // Sensors on the 0th line, pin 10. Currently 0 -> 3, Heat Accumulator
       else          T[i] = sensorsR.getTempC(sens[i]);        // Sensors on the 1st line, pin 11. Currently 4 -> 7, Room temperature
       
-      if ( T[i] < -100 ) T[i] = 10 * ( 8 - i ) + 0.5;         // Just to simulate some meaningfull number
+      if ( T[i] < -100 ) T[i] = 15 * ( 5 - i ) + 0.5;         // Just to simulate some meaningfull number
       SerialMon.print("T"); SerialMon.print(i); SerialMon.print(" "); SerialMon.print(T[i]); SerialMon.print("   "); 
     }
     SerialMon.println();  
@@ -211,7 +206,7 @@ void loop() {
     // *** End presentation
   }
 
-  if( (millis() - lastDataSent) > 3600000 ) {                                           // Modem restart once in 60 min.
+  if( (millis() - lastDataSent) > 3600000 ) {                                                               // Modem restart once in 60 min.
     SerialMon.print(F(" ***** Last Data Sent  ")); SerialMon.print((millis() - lastDataSent) / 60000);    
     SerialMon.print(F("min ago ****    ***** Modem restart ****  ")); SerialMon.println(millis());
     modem.restart();
@@ -239,7 +234,7 @@ void loop() {
   TankT = Tconv(Ut) + Tconv(Um) + Tconv(Bm) + Tconv(Bt);                                // String variable to be sent to a6script.php, 8 numbers
   RoomT = Tconv(KitT) + Tconv(LivT) + Tconv(BathT) + Tconv(CorT) + Tconv(Bed1);         // String variable to be sent to a6script.php, 10 numbers
   
-  SerialMon.print(F("\nTankTemp: ")); SerialMon.print(TankT);  SerialMon.print(F("  RoomTemp: ")); SerialMon.println(RoomT);  
+  // SerialMon.print(F("\nTankTemp: ")); SerialMon.print(TankT);  SerialMon.print(F("  RoomTemp: ")); SerialMon.println(RoomT);  
   // SerialMon.println(F("\t\t\t\t**  HW status"));
   // SerialMon.println("\t\t\t\t\t**");
       
@@ -247,13 +242,13 @@ void loop() {
   
   byte len = sizeof(eqwArr)/sizeof(eqwArr[0]);                              // Number of elements in equArr
   eqw = eqSta(len, eqwArr, eqwP);                                           // Encoded equipment status (binary)
-  
+  /*
   for (byte i = 0; i < len ; i++) {
     SerialMon.print(i); SerialMon.print("\t");
   }  
-  SerialMon.println("**");
+  SerialMon.println("**");*/
   for (byte i = 0; i < len ; i++) {
-    SerialMon.print(eqwArr[i]); SerialMon.print("\t"); 
+    SerialMon.print(eqwArr[i]); SerialMon.print("-"); // SerialMon.print("\t"); 
   }
   SerialMon.println(F("**\n"));
   
@@ -283,8 +278,7 @@ void loop() {
   }
   SerialMon.println(F(" success GSM"));
   lcd.setCursor(0,3); lcd.print( F("*** Success GSM  ***") );
-  //--------------------------------01234567890123456789
-  
+  //--------------------------------01234567890123456789  
 
   if (modem.isNetworkConnected()) {
     SerialMon.println(F("Network connected GSM"));
@@ -295,7 +289,7 @@ void loop() {
 #if TINY_GSM_USE_GPRS
   // GPRS connection parameters are usually set after network registration
     SerialMon.print( F("Connecting to Megafon ") );
-    lcd.setCursor(0,3); lcd.print( F("Connecting to Megafn") );
+    lcd.setCursor(0,3); lcd.print( F(" Connect. to Megafon") );
     //--------------------------------01234567890123456789
     SerialMon.print(apn); SerialMon.print("  ");
     if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
@@ -405,11 +399,7 @@ void loop() {
     Dpos = buf.indexOf("$measD");                                     // Getting Date out of recieved http text.
     Dstr = buf.substring(Dpos + 10, Dpos + 18);    
     SerialMon.print(F(" Date recieved ")); SerialMon.println(Dstr); 
-    /*
-    SerialMon.print(F(" H: ")); SerialMon.println( Tstr.substring(0, 2).toInt() );
-    SerialMon.print(F(" M: ")); SerialMon.println( Tstr.substring(3, 5).toInt() );
-    SerialMon.print(F(" S: ")); SerialMon.println( Tstr.substring(6, 8).toInt() );
-  */
+    
     // Here is the RTC syncronization
     /*
     //if ( Tstr.substring(3, 5).toInt() !=  rtc_t.min ) {    // - possible condition
@@ -417,11 +407,9 @@ void loop() {
       rtc.setTime( Tstr.substring(0, 2).toInt(), Tstr.substring(3, 5).toInt(), Tstr.substring(6, 8).toInt() );           // Set the time to hh:mm:ss (24hr format)
       rtc.setDate( Dstr.substring(0, 2).toInt(), Dstr.substring(3, 5).toInt(), Dstr.substring(6, 8).toInt() );           // Set the date to dd/mm/yy 
       //} */
-    syncronizeRTC( Tstr, Dstr, 8 );
-   
-    
+    syncronizeRTC( Tstr, Dstr, 8 );    
 
-    // -------- Get time and date from rtc ---------
+    // -------- Get time and date from the rtc ---------
     rtc_t = rtc.getTime();                                 
     rtc_temp = rtc.getTemp(); 
     
@@ -429,10 +417,7 @@ void loop() {
     
     lcd.setCursor(0,3); lcd.print( F("* RTC synchronized *") ); 
     //--------------------------------01234567890123456789
-    /*
-    SerialMon.print("Time read from RTC: "); SerialMon.print(rtc_t.hour); SerialMon.print(":"); SerialMon.print(rtc_t.min); SerialMon.print(":"); SerialMon.println(rtc_t.sec);
-    SerialMon.print("Date read from RTC: "); SerialMon.print(day_of_month = rtc_t.date); SerialMon.print("-"); SerialMon.print(rtc_t.mon); SerialMon.print("-"); SerialMon.println(rtc_t.year);
-    */
+
   }  
  
   // *****  Shutdown  *****
@@ -584,7 +569,7 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {     // This funktion s
   uint8_t d, maxD, month;     // day of month, max day number in the current month, month number
   uint16_t y;                 // max value 32k
   
-  SerialMon.println(F(" *** RTC syncronization procedure *** ")); SerialMon.println();
+  SerialMon.println(F(" *** RTC syncronization proced  ure *** ")); SerialMon.println();
   /*
   SerialMon.print("Time str: "); SerialMon.println(T); 
   SerialMon.print("Date str: "); SerialMon.println(D); 
@@ -605,19 +590,14 @@ void syncronizeRTC( String T, String D, uint8_t corrS ) {     // This funktion s
   else maxD = 31;                                                                   // Jan., Mar., May., Jul., Aug., Oct., Dec.
 
   s += corrS;                           // Setting time correction
-  if ( s > 59 ) { 
-    s -= 60; m++; 
-    if ( m > 59 ) { 
-      m -= 60; h++; 
-      if ( h > 23 ) { 
-        h -= 24; d++; 
-        if ( d > maxD ) { 
-          d -= maxD; 
-          month++; 
-          if ( month > 12 ) { month = 1; y++; }
-        } // d
-      }   // h
-    }     // m
+  if ( s > 59 ) { s -= 60; m++; 
+                  if ( m > 59 ) { m -= 60; h++; 
+                                  if ( h > 23 ) { h -= 24; d++; 
+                                                  if ( d > maxD ) { d -= maxD; month++; 
+                                                                    if ( month > 12 ) { month = 1; y++; }
+                                                  } // d
+                                  }   // h
+                   }     // m
   }       // s
   y += 2000;    // Y2K issue
     
